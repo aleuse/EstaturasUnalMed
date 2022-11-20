@@ -1,0 +1,105 @@
+---
+title: "Trabajo Final"
+output: html_document
+date: "2022-11-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Leer datos
+library(readxl)
+datos = read_excel("datos.xlsx")
+```
+
+```{r}
+library(dplyr)
+
+# Transformar los datos
+
+# Cambiar los nombres de las variables
+nombres_originales = names(datos)
+nombres_nuevos = c("Fecha", "Correo", "Sexo", "Edad", "Estatura_estudiante", "Estatura_madre", 
+                   "Estatura_padre")
+names(datos) = nombres_nuevos
+
+# Transformar las estaturas a variables numéricas; transformar el sexo a variable categórica
+datos = transform(datos, Estatura_estudiante = as.numeric(Estatura_estudiante),
+                  Estatura_madre = as.numeric(Estatura_madre),
+                  Estatura_padre = as.numeric(Estatura_padre),
+                  Sexo = as.factor(Sexo))
+
+# Eliminar datos que no sirven (Estaturas de 0 o Edades menores a 18)
+datos = datos %>% 
+        filter(Edad >= 18 & Estatura_estudiante > 1 & Estatura_madre > 1 & Estatura_padre > 1)
+
+# Estaturas de como 1.53 o 1.79 son posibles errores de digitación así que se multiplican por 100
+datos = datos %>% 
+        mutate(Estatura_estudiante = ifelse((Estatura_estudiante > 1 & Estatura_estudiante < 2),
+                                            Estatura_estudiante * 100, Estatura_estudiante)) %>% 
+        mutate(Estatura_madre = ifelse((Estatura_madre > 1 & Estatura_madre < 2),
+                                            Estatura_madre * 100, Estatura_madre)) %>%
+        mutate(Estatura_padre = ifelse((Estatura_padre > 1 & Estatura_padre < 2),
+                                            Estatura_padre * 100, Estatura_padre))
+
+# Transformar Edad a una variable categórica
+datos = transform(datos, Edad = as.factor(Edad))
+
+# Eliminar estaturas que no sirven (valores como 35)
+datos = datos %>% 
+        filter(Estatura_estudiante >= 100 & Estatura_madre >= 100 & Estatura_padre >= 100)
+
+# Quedarnos solo con los que tengan correo institucional
+datos = datos %>% 
+        filter(grepl("unal", Correo))
+```
+
+
+```{r}
+summary(datos)
+```
+
+```{r}
+summary(datos %>% 
+  filter(Sexo == "Hombre"))
+```
+
+```{r}
+summary(datos %>% 
+  filter(Sexo == "Mujer"))
+```
+
+
+
+```{r}
+hist(datos$Estatura_estudiante, xlab = "Estatura (cm)", breaks = "Sturges",
+     col = "blue", freq = TRUE, ylab = "Frecuencias", main = "Histograma de frecuencia la estatura de los estudiantes")
+axis(1, at=seq(130, 200, by = 10), labels = seq(130, 200, by = 10))
+axis(2, at=seq(0, 50, by = 10), labels = seq(0, 50, by = 10))
+```
+
+```{r}
+library(ggplot2)
+ggplot(datos, aes(x = Estatura_padre, y = Estatura_estudiante, color= Sexo)) + 
+      geom_point(size = 2) +
+      geom_abline() +
+      xlab("Estatura del padre") + 
+      xlim(130, 200) +
+      ylab("Estatura del estudiante") + 
+      ylim(130, 200)
+```
+
+```{r}
+library(ggplot2)
+ggplot(datos, aes(x = Estatura_madre, y = Estatura_estudiante, color= Sexo)) + 
+      geom_point(size = 2) +
+      geom_abline() +
+      xlab("Estatura de la madre") + 
+      xlim(130, 200) +
+      ylab("Estatura del estudiante") + 
+      ylim(130, 200)
+```
+
+
