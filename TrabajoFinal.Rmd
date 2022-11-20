@@ -102,4 +102,17 @@ ggplot(datos, aes(x = Estatura_madre, y = Estatura_estudiante, color= Sexo)) +
       ylim(130, 200)
 ```
 
+```{r}
+#install.packages('Rcmdr')
+library(Rcmdr)
+#install.packages("viridis")  # Install
+library(viridis)
+par(mfrow = c(1, 3))
+with(datos, plotMeans(Estatura_padre, Sexo, main = "Gráfico de medias", xlab = "Sexo (estudiante)", 
+                      ylab = "Estatura padre", ylim=c(155, 175), error.bars= "conf.int", level=0.95, connect=TRUE))
+with(datos, plotMeans(Estatura_estudiante, main = "Gráfico de medias", xlab = "Sexo (estudiante)", 
+                      ylab = "Estatura estudiante", Sexo, ylim=c(155, 175), error.bars= "conf.int", level=0.95, connect=TRUE))
+with(datos, plotMeans(Estatura_madre, Sexo, main = "Gráfico de medias", xlab = "Sexo (estudiante)", 
+                      ylab = "Estatura madre", ylim=c(155, 175), error.bars= "conf.int", level=0.95, connect=TRUE))
+```
 
